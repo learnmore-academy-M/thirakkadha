@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>തിരക്കഥ — നിങ്ങളുടെ സ്ക്രിപ്റ്റ് അസിസ്റ്റന്റ് 🎬</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anek+Malayalam:wght@400;600;700;800&family=Manjari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0b08; --bg2:#161209;
+  --panel:#1c1710; --panel2:#241d12;
+  --gold:#f5b942; --gold2:#ffd479; --amber:#ffb347;
+  --red:#d64541; --cream:#f3e9d2; --dim:#9a8a6a;
+  --line:rgba(245,185,66,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  font-family:'Manjari',sans-serif;color:var(--cream);
+  background:radial-gradient(1200px 600px at 50% -10%,rgba(255,179,71,.14),transparent 60%),
+             radial-gradient(900px 500px at 85% 110%,rgba(214,69,65,.08),transparent 60%),
+             linear-gradient(180deg,var(--bg2),var(--bg) 60%);
+  min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+}
+/* ---- film grain ---- */
+body::before{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:60;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain .5s steps(2) infinite;}
+@keyframes grain{0%{transform:translate(0,0)}50%{transform:translate(2%,-1%)}100%{transform:translate(-1%,2%)}}
+/* ---- dust ---- */
+.dust{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.dust i{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;
+  background:rgba(255,212,121,.5);animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-110vh);opacity:0}}
+/* ---- film strips ---- */
+.strip{height:22px;flex:none;background:
+  repeating-linear-gradient(90deg,#000 0 16px,#000 16px,transparent 16px),
+  repeating-linear-gradient(90deg,transparent 0 6px,rgba(245,185,66,.25) 6px 12px,transparent 12px 16px),
+  #0a0805;border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:relative;z-index:2}
+/* ---- marquee header ---- */
+header{flex:none;text-align:center;padding:20px 16px 14px;position:relative;z-index:2}
+.marquee{display:inline-flex;align-items:center;gap:12px;padding:10px 26px;border:2px solid var(--line);
+  border-radius:14px;background:linear-gradient(180deg,rgba(245,185,66,.08),rgba(245,185,66,.02));
+  box-shadow:0 0 40px rgba(245,185,66,.15),inset 0 0 20px rgba(245,185,66,.05)}
+.bulb{width:10px;height:10px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 12px var(--gold),0 0 4px #fff;animation:blink 1.4s ease-in-out infinite}
+.bulb:nth-child(odd){animation-delay:.7s}
+@keyframes blink{50%{opacity:.25;box-shadow:none}}
+h1{margin:0;font-family:'Anek Malayalam',sans-serif;font-weight:800;
+  font-size:clamp(30px,6vw,44px);line-height:1;letter-spacing:.5px;
+  background:linear-gradient(180deg,var(--gold2),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 30px rgba(245,185,66,.25)}
+.sub{margin:8px 0 0;font-size:14px;color:var(--dim);letter-spacing:2px}
+.sub b{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:3px;font-size:15px}
+/* ---- stage ---- */
+.stage{flex:1;overflow-y:auto;padding:18px 14px;position:relative;z-index:2;scroll-behavior:smooth}
+.stage::-webkit-scrollbar{width:6px}.stage::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+.welcome{max-width:560px;margin:30px auto;text-align:center;color:var(--dim);line-height:1.9;font-size:16px}
+.welcome .clap{font-size:52px;animation:sway 3s ease-in-out infinite;display:inline-block}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.msg{display:flex;margin:14px 0;animation:pop .35s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:82%;padding:13px 16px;border-radius:16px;line-height:1.75;font-size:16px;white-space:pre-wrap;word-break:break-word}
+.user .bubble{background:linear-gradient(135deg,#8a5a12,#5c3c0c);color:#ffe9bd;border-bottom-right-radius:4px;
+  box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.bot .bubble{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);border-bottom-left-radius:4px}
+.meta{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:11px;color:var(--dim)}
+.spk{border:0;background:none;cursor:pointer;font-size:14px;opacity:.7;padding:0}
+.spk:hover{opacity:1;transform:scale(1.2)}
+/* typing */
+.typing .bubble{display:flex;gap:6px;padding:16px 18px}
+.typing i{width:9px;height:9px;border-radius:50%;background:var(--gold);animation:roll 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes roll{0%,70%,100%{opacity:.2;transform:translateY(0)}35%{opacity:1;transform:translateY(-6px)}}
+/* ---- quick chips ---- */
+.chips{flex:none;display:flex;gap:8px;overflow-x:auto;padding:8px 14px;position:relative;z-index:2;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:rgba(245,185,66,.05);color:var(--gold2);
+  border-radius:999px;padding:8px 16px;font-family:'Manjari';font-size:14px;cursor:pointer;transition:.2s}
+.chip:hover{background:rgba(245,185,66,.15);transform:translateY(-2px)}
+/* ---- composer ---- */
+.composer{flex:none;display:flex;align-items:flex-end;gap:10px;padding:12px 14px 16px;position:relative;z-index:2;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.5))}
+#inp{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--cream);border-radius:14px;
+  padding:14px 16px;font-family:'Manjari';font-size:16px;resize:none;max-height:110px;outline:none;transition:.2s}
+#inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,185,66,.15)}
+.btn{width:52px;height:52px;flex:none;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;transition:.2s;font-size:22px}
+.mic{background:linear-gradient(135deg,var(--gold),var(--amber));box-shadow:0 4px 20px rgba(245,185,66,.4);position:relative}
+.mic svg{width:24px;height:24px;fill:#1a1206}
+.mic.rec{background:linear-gradient(135deg,var(--red),#a32e2b)}
+.mic.rec svg{fill:#fff}
+.mic.rec::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+.send{background:var(--panel);border:1px solid var(--line)}
+.send svg{width:22px;height:22px;fill:var(--gold)}
+.btn:hover{transform:translateY(-2px)}
+/* ---- settings drawer ---- */
+.gear{position:absolute;top:16px;right:16px;z-index:5;width:44px;height:44px;border-radius:50%;
+  background:var(--panel);border:1px solid var(--line);color:var(--gold);font-size:20px;cursor:pointer}
+.drawer{position:fixed;top:0;right:-340px;width:320px;max-width:90vw;height:100dvh;z-index:50;
+  background:var(--panel2);border-left:1px solid var(--line);padding:24px 20px;transition:right .35s cubic-bezier(.2,.9,.3,1)}
+.drawer.open{right:0}
+.drawer h3{font-family:'Anek Malayalam';color:var(--gold);margin:0 0 6px}
+.drawer p{font-size:13.5px;color:var(--dim);line-height:1.7}
+.drawer a{color:var(--gold2)}
+.drawer input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--cream);
+  border-radius:10px;padding:12px;font-family:'Manjari';font-size:14px;margin-top:6px}
+.drawer .row{display:flex;gap:8px;margin-top:12px}
+.drawer button{flex:1;padding:12px;border-radius:10px;border:0;cursor:pointer;font-family:'Manjari';font-weight:700}
+#saveKey{background:linear-gradient(135deg,var(--gold),var(--amber));color:#1a1206}
+#closeDrawer{background:var(--panel);color:var(--cream);border:1px solid var(--line)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:.3s}
+.overlay.show{opacity:1;pointer-events:auto}
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);z-index:70;
+  background:var(--panel2);border:1px solid var(--gold);color:var(--gold2);padding:10px 22px;border-radius:999px;
+  font-size:14px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:420px){.marquee{padding:8px 16px;gap:8px}.btn{width:48px;height:48px}}
+</style>
+</head>
+<body>
+<div class="dust" id="dust"></div>
+<div class="strip"></div>
+
+<header>
+  <div class="marquee">
+    <span class="bulb"></span>
+    <h1>തിരക്കഥ</h1>
+    <span class="bulb"></span>
+  </div>
+  <p class="sub"><b>SCENE&nbsp;ASSISTANT</b> · voice-ൽ പറയൂ, scene ആക്കി തരാം</p>
+</header>
+
+<button class="gear" id="gear" title="Settings">⚙️</button>
+
+<div class="stage" id="stage">
+  <div class="welcome" id="welcome">
+    <span class="clap">🎬</span><br>
+    ഹായ്! ഞാൻ <b style="color:var(--gold)">തിരക്കഥ</b>.<br>
+    ഒരു <b style="color:var(--gold2)">scene</b> voice-ലോ text-ലോ പറയൂ — ഞാൻ അത് polish ചെയ്ത്<br>
+    ശരിയായ screenplay format-ൽ തരാം. സിനിമ കാര്യങ്ങളും ചോദിക്കാം!<br>
+    <span style="font-size:13px">🎤 താഴെയുള്ള mic അമർത്തി സംസാരിക്കൂ</span>
+  </div>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div class="composer">
+  <button class="btn mic" id="mic" title="Voice-ൽ പറയൂ">
+    <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2z"/></svg>
+  </button>
+  <textarea id="inp" rows="1" placeholder="Scene എഴുതൂ… / mic അമർത്തൂ"></textarea>
+  <button class="btn send" id="send" title="അയക്കൂ">
+    <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+  </button>
+</div>
+
+<div class="strip"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <h3>⚙️ Setup</h3>
+  <p>ഇത് <b style="color:var(--gold2)">100% ഫ്രീ</b> ആണ്. ഒരു Gemini key മാത്രം വേണം (അതും ഫ്രീ, card വേണ്ട):</p>
+  <p>1. <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> തുറക്കൂ<br>
+     2. Google account കൊണ്ട് login<br>
+     3. "Create API Key" ഞെക്കൂ<br>
+     4. Key താഴെ paste ചെയ്യൂ</p>
+  <input id="key" type="password" placeholder="AIza... key ഇവിടെ">
+  <div class="row">
+    <button id="saveKey">💾 Save</button>
+    <button id="closeDrawer">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const stage=$('#stage'),inp=$('#inp'),mic=$('#mic'),toast=$('#toast'),chips=$('#chips');
+let key=localStorage.getItem('tk_key')||'', hist=[], recOn=false, speakOn=false;
+
+const PROMPT=`നീ "തിരക്കഥ" — ഒരു Malayalam film script assistant. നിയമങ്ങൾ:
+1. സിനിമ/സ്ക്രിപ്റ്റ്/scene/ഡയലോഗ്/കഥ/സിനിമ-വിവരങ്ങൾ — ഇവയിൽ മാത്രം മറുപടി. മറ്റേത് വിഷയത്തിനും: "ഞാൻ സിനിമ കാര്യങ്ങളിൽ മാത്രം സഹായിക്കുന്ന assistant ആണ് 🎬" എന്ന് പറയൂ.
+2. ഒരു scene/സന്ദർഭം voice-ലോ text-ലോ കിട്ടിയാൽ, അത് polish ചെയ്ത് ഈ format-ൽ നൽകൂ:
+സീൻ [നം] – [ഇടം] – [സമയം] (INT/EXT)
+[action/അന്തരീക്ഷ വിവരണം]
+[കഥാപാത്രം] (ഭാവം) : "ഡയലോഗ്"
+3. സിനിമകളെ കുറിച്ച് ചോദിച്ചാൽ കൃത്യമായി പറയൂ. ഉറപ്പില്ലെങ്കിൽ സത്യസന്ധമാകൂ.
+4. "തുടരൂ" എന്നാൽ മുൻപുള്ളത് തുടരൂ.
+5. user-ന്റെ ഭാഷയിൽ മറുപടി. ചെറിയ ഖണ്ഡികകൾ, emoji കുറച്ച്.`;
+
+const QUICK=["🎬 ഒരു മഴക്കാലം scene","🎥 ദൃശ്യം സിനിമ പറയൂ","✍️ 5 മിനിറ്റ് short film","💔 ഒരു emotional scene","😂 ഒരു comedy scene"];
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toastMsg(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>toast.classList.remove('show'),2600)}
+
+function addMsg(who,text){
+  $('#welcome')?.remove();
+  const d=document.createElement('div');d.className='msg '+who;
+  const spk=who==='bot'?`<button class="spk">🔊</button>`:'';
+  d.innerHTML=`<div class="bubble">${esc(text).replace(/\n/g,'<br>')}<div class="meta">${spk}</div></div>`;
+  if(spk)d.querySelector('.spk').onclick=()=>speak(text);
+  stage.appendChild(d);stage.scrollTop=stage.scrollHeight;
+}
+function showTyping(){const d=document.createElement('div');d.className='msg bot typing';d.id='tp';
+  d.innerHTML='<div class="bubble"><i></i><i></i><i></i></div>';stage.appendChild(d);stage.scrollTop=stage.scrollHeight}
+const hideTyping=()=>$('#tp')?.remove();
+
+async function ask(text){
+  if(!key){openDrawer();toastMsg('ആദ്യം free Gemini key ചേർക്കൂ ⚙️');return}
+  addMsg('user',text);inp.value='';inp.style.height='auto';showTyping();
+  hist.push({role:'user',parts:[{text}]});if(hist.length>10)hist.splice(0,2);
+  try{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system_instruction:{parts:[{text:PROMPT}]},contents:hist,generationConfig:{temperature:.8,maxOutputTokens:2500}})});
+    const j=await r.json();hideTyping();
+    if(!r.ok)throw new Error(j?.error?.message||'error');
+    const out=(j.candidates?.[0]?.content?.parts?.[0]?.text||'ക്ഷമിക്കണം 🙏').trim();
+    hist.push({role:'model',parts:[{text:out}]});
+    addMsg('bot',out); if(speakOn)speak(out);
+  }catch(e){hideTyping();addMsg('bot','⚠️ '+e.message)}
+}
+
+function speak(t){
+  if(!('speechSynthesis'in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);u.lang=/[\u0D00-\u0D7F]/.test(t)?'ml-IN':'en-IN';
+  const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith(u.lang.slice(0,2)));if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+
+/* ---- voice input ---- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){
+  const rec=new SR();rec.lang='ml-IN';rec.interimResults=false;
+  rec.onresult=e=>ask(e.results[0][0].transcript);
+  rec.onstart=()=>{recOn=true;mic.classList.add('rec');toastMsg('🎙️ കേൾക്കുന്നു…')}
+  rec.onend=()=>{recOn=false;mic.classList.remove('rec')}
+  rec.onerror=()=>{recOn=false;mic.classList.remove('rec');toastMsg('Mic ലഭ്യമല്ല 😕')}
+  mic.onclick=()=>recOn?rec.stop():(()=>{try{rec.start()}catch(e){toastMsg('Mic ലഭ്യമല്ല')}})();
+}else mic.onclick=()=>toastMsg('ഈ browser-ൽ voice ഇല്ല 😕');
+
+/* ---- ui ---- */
+$('#send').onclick=()=>ask(inp.value);
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask(inp.value)}});
+inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=inp.scrollHeight+'px'});
+QUICK.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;
+  b.onclick=()=>ask(q.replace(/^[^\s]+\s/,''));chips.appendChild(b)});
+
+/* ---- drawer ---- */
+const drawer=$('#drawer'),overlay=$('#overlay');
+function openDrawer(){drawer.classList.add('open');overlay.classList.add('show');$('#key').value=key}
+function closeDrawer(){drawer.classList.remove('open');overlay.classList.remove('show')}
+$('#gear').onclick=openDrawer;$('#closeDrawer').onclick=closeDrawer;overlay.onclick=closeDrawer;
+$('#saveKey').onclick=()=>{key=$('#key').value.trim();localStorage.setItem('tk_key',key);
+  closeDrawer();toastMsg(key?'✅ Ready! പറഞ്ഞു തുടങ്ങൂ 🎬':'Key cleared')}
+
+/* ---- dust ---- */
+const dust=$('#dust');for(let i=0;i<25;i++){const s=document.createElement('i');
+  s.style.left=Math.random()*100+'vw';s.style.animationDuration=(8+Math.random()*14)+'s';
+  s.style.animationDelay=(-Math.random()*20)+'s';s.style.opacity=.2+Math.random()*.5;dust.appendChild(s)}
+
+if(!key)setTimeout(openDrawer,800);
+</script>
+</body>
+</html>
