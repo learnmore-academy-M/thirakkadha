@@ -172,9 +172,6 @@ const $=s=>document.querySelector(s);
 const stage=$('#stage'),inp=$('#inp'),mic=$('#mic'),toast=$('#toast'),chips=$('#chips');
 let key=localStorage.getItem('tk_key')||'', hist=[], recOn=false, speakOn=false;
 
-/* ✅ പുതിയ models ഓട്ടോ try ചെയ്യും — ഇനി "not available" error വരില്ല */
-const MODELS=['gemini-3-flash','gemini-3-pro','gemini-2.5-flash','gemini-2.0-flash'];
-
 const PROMPT=`നീ "തിരക്കഥ" — ഒരു Malayalam film script assistant. നിയമങ്ങൾ:
 1. സിനിമ/സ്ക്രിപ്റ്റ്/scene/ഡയലോഗ്/കഥ/സിനിമ-വിവരങ്ങൾ — ഇവയിൽ മാത്രം മറുപടി. മറ്റേത് വിഷയത്തിനും: "ഞാൻ സിനിമ കാര്യങ്ങളിൽ മാത്രം സഹായിക്കുന്ന assistant ആണ് 🎬" എന്ന് പറയൂ.
 2. ഒരു scene/സന്ദർഭം voice-ലോ text-ലോ കിട്ടിയാൽ, അത് polish ചെയ്ത് ഈ format-ൽ നൽകൂ:
@@ -202,9 +199,24 @@ function showTyping(){const d=document.createElement('div');d.className='msg bot
   d.innerHTML='<div class="bubble"><i></i><i></i><i></i></div>';stage.appendChild(d);stage.scrollTop=stage.scrollHeight}
 const hideTyping=()=>$('#tp')?.remove();
 
+/* ✅ നിങ്ങളുടെ account-ൽ ലഭ്യമായ ഏറ്റവും പുതിയ model ഓട്ടോ ആയി കണ്ടെത്തും (gemini-3 ഉൾപ്പെടെ) */
+async function getLiveModels(){
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+key+'&pageSize=200');
+    const j=await r.json();
+    return (j.models||[]).map(m=>(m.name||'').replace('models/',''));
+  }catch(e){return []}
+}
 async function callGemini(){
+  const live=await getLiveModels();
+  const chain=[...new Set([
+    live.find(n=>/^gemini-3/.test(n)&&/flash/.test(n)),
+    live.find(n=>/flash/.test(n)),
+    live.find(n=>/^gemini/.test(n)),
+    'gemini-3-flash','gemini-3-pro','gemini-2.5-flash','gemini-2.0-flash'
+  ].filter(Boolean))];
   let err='';
-  for(const m of MODELS){
+  for(const m of chain){
     const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({system_instruction:{parts:[{text:PROMPT}]},contents:hist,generationConfig:{temperature:.8,maxOutputTokens:2500}})});
@@ -213,7 +225,7 @@ async function callGemini(){
     err=j?.error?.message||('HTTP '+r.status);
     if(!/available|not found|deprecat|disabled|404/i.test(err))break;
   }
-  throw new Error(err);
+  throw new Error(err||'model കിട്ടിയില്ല');
 }
 
 async function ask(text){
